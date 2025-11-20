@@ -1,59 +1,57 @@
 import express from "express";
-import { json } from "zod";
-
+import { todoModel } from "./db";
 
 export const app = express();
+
 app.use(express.json());
 
-let todos: { id: number; title: string; completed: boolean }[] = [];
-let id = 1;
-
-app.get("/todos",(req,res)=>{
-    res.json({
-        todos
-    })
-})
-
-app.post("/todos",(req,res)=>{
-    const {title} = req.body;
-     if(!title){
-        res.status(400).json({
-            msg:"Invalid Data"
-        })
-        return
-     }
-     const todo = {
-        id: id++,
-        title:title,
-        completed:false
-     }
-     todos.push(todo);
-     
-     res.status(200).json({
-        todo
-     })
-})
-app.put("/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === Number(req.params.id));
-
-  if (!todo) {
-    return res.status(404).json({ error: "Todo not found" });
+app.post("/todos", async (req, res) => {
+  const { title, status } = req.body;
+  if (!title) {
+    res.status(422).json({
+      msg: "No entries added",
+    });
+    return;
   }
-
-  const { title, completed } = req.body;
-  if (title !== undefined) todo.title = title;
-  if (completed !== undefined) todo.completed = completed;
-
-  res.json({ todo });
+  const todo = await todoModel.create({
+    title,
+    status,
+  });
+  res.status(200).json({
+    todo,
+  });
 });
-app.delete("/todos/:id", (req, res) => {
-  const idx = todos.findIndex((t) => t.id === Number(req.params.id));
 
-  if (idx === -1) {
-    return res.status(404).json({ error: "Todo not found" });
+app.get("/todos", async (req, res) => {
+  const todos = await todoModel.find();
+  res.json({
+    todos,
+  });
+});
+
+app.put("/todos/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, status } = req.body;
+  try {
+    const todo = await todoModel.findByIdAndUpdate(
+      id,
+      { title, status },
+      { new: true }
+    );
+    res.json({
+      todo,
+    });
+  } catch (error) {
+    console.log(error);
   }
+});
 
-  todos.splice(idx, 1);
-
-  res.json({ message: "Deleted" });
+app.delete("/todos/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const todo = await todoModel.findByIdAndDelete(id);
+    res.json({ msg: "Todo deleted successfully", todo });
+  } catch (error) {
+    console.log(error);
+  }
 });
