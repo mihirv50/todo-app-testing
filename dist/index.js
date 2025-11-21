@@ -19,29 +19,46 @@ exports.app = (0, express_1.default)();
 exports.app.use(express_1.default.json());
 exports.app.post("/todos", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, status } = req.body;
-    if (!title && !status) {
+    if (!title) {
         res.status(422).json({
-            msg: "No entries added"
+            msg: "Title is required",
         });
         return;
     }
     const todo = yield db_1.todoModel.create({
-        title, status
+        title,
+        status,
     });
-    res.status(200).json({
-        todo
+    res.status(201).json({
+        todo,
     });
 }));
 exports.app.get("/todos", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title } = req.body;
-    const todo = yield db_1.todoModel.findOne({
-        title
-    });
+    const todos = yield db_1.todoModel.find();
     res.json({
-        todo
+        todos,
     });
 }));
-exports.app.put("/todos", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title } = req.body;
-    const todo = yield db_1.todoModel.updateOne({});
+exports.app.put("/todos/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { title, status } = req.body;
+    try {
+        const todo = yield db_1.todoModel.findByIdAndUpdate(id, { title, status }, { new: true });
+        res.json({
+            todo,
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}));
+exports.app.delete("/todos/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const todo = yield db_1.todoModel.findByIdAndDelete(id);
+        res.json({ msg: "Todo deleted successfully", todo });
+    }
+    catch (error) {
+        console.log(error);
+    }
 }));

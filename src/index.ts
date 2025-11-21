@@ -9,7 +9,7 @@ app.post("/todos", async (req, res) => {
   const { title, status } = req.body;
   if (!title) {
     res.status(422).json({
-      msg: "No entries added",
+      msg: "Title is required",
     });
     return;
   }
@@ -17,7 +17,7 @@ app.post("/todos", async (req, res) => {
     title,
     status,
   });
-  res.status(200).json({
+  res.status(201).json({
     todo,
   });
 });
@@ -30,11 +30,10 @@ app.get("/todos", async (req, res) => {
 });
 
 app.put("/todos/:id", async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
   const { title, status } = req.body;
   try {
     const todo = await todoModel.findByIdAndUpdate(
-      id,
       { title, status },
       { new: true }
     );

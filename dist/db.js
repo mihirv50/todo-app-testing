@@ -43,7 +43,7 @@ const zod_1 = require("zod");
 dotenv_1.default.config();
 mongoose_1.default.connect(process.env.MONGO_URI);
 const todoSchema = new mongoose_1.Schema({
-    title: String,
+    title: { type: String, required: true },
     status: { type: zod_1.boolean, default: false },
 });
 exports.todoModel = mongoose_1.default.model("todo", todoSchema);
