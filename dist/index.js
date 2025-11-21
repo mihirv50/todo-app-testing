@@ -40,10 +40,10 @@ exports.app.get("/todos", (req, res) => __awaiter(void 0, void 0, void 0, functi
     });
 }));
 exports.app.put("/todos/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+    // const { id } = req.params;
     const { title, status } = req.body;
     try {
-        const todo = yield db_1.todoModel.findByIdAndUpdate(id, { title, status }, { new: true });
+        const todo = yield db_1.todoModel.findByIdAndUpdate({ title, status }, { new: true });
         res.json({
             todo,
         });
